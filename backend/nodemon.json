@@ -1,0 +1,8 @@
+{
+    "env": {
+      "MONGO_URI": "mongodb+srv://RiyaSharma:RiyaSharma@cluster0.4d2qo.mongodb.net/users?retryWrites=true&w=majority&appName=Cluster0",
+      "PORT": "5000",
+      "JWT_SECRET": "secrettoken"
+    }
+  }
+  

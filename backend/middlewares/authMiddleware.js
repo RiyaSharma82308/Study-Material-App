@@ -24,4 +24,15 @@ const protect = (req, res, next) => {
   }
 };
 
-module.exports = protect;
+// 📌 Role-Based Authorization Middleware
+const authorizeRole = (roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Access Denied: Unauthorized role" });
+    }
+    next();
+  };
+};
+
+
+module.exports = { protect, authorizeRole };

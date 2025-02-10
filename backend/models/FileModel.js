@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 
-const FileSchema = new mongoose.Schema({
-    filename: { type: String, required: true },
-    filepath: { type: String, required: true },
-    mimetype: { type: String, required: true },
-    size: { type: Number, required: true },
-    uploadedAt: { type: Date, default: Date.now },
-});
+const FileSchema = new mongoose.Schema(
+  {
+    filename: String,
+    filepath: String,
+    mimetype: String,
+    size: Number,
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Link to user
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("File", FileSchema);

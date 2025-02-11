@@ -1,8 +1,12 @@
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 
-const enteredPassword = "123456"; // The password you entered in login
-const storedHashedPassword = "$2a$10$JXvPV.JHufQTkudmqe58..Mg/OBYFio/uZFk2JVVDWVTySVypWM4S"; // Your stored hash
+const plainPassword = "123456";
+const storedHash = "$2a$10$Y3bwrazt11OGSTN6NtCTOeMZUxdQIYrqosTM1LPH3HoqSf.oBRbq2"; // Replace with the exact hash from DB
 
-bcrypt.compare(enteredPassword, storedHashedPassword).then((match) => {
-  console.log("🔍 Password Match:", match);
+bcrypt.compare(plainPassword, storedHash, (err, result) => {
+  if (err) {
+    console.error("❌ Error during comparison:", err);
+  } else {
+    console.log("🔍 Password match result:", result);
+  }
 });

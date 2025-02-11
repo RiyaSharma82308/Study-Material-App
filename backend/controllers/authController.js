@@ -2,38 +2,36 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// Register a new user
+
+
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Validate required fields
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
+    // ❌ Remove bcrypt.hash() (Pre-save hook will handle hashing)
+    const newUser = new User({ name, email, password, role });
 
-    // Check if user already exists
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "User already exists" });
+    await newUser.save();
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("✅ Hashed Password After Saving:", newUser.password);
 
-    // Create new user
-    const newUser = await User.create({ name, email, password: hashedPassword, role });
-
-    // Generate token
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-    res.status(201).json({ 
-      message: "User registered successfully", 
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }, 
-      token 
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      }
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
+    console.error("❌ Registration Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 // Login user
 const loginUser = async (req, res) => {

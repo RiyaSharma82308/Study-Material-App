@@ -34,11 +34,19 @@ router.post("/upload", verifyToken, authorizeRoles(["admin", "server"]), upload.
 router.get("/files", verifyToken, authorizeRoles(["admin", "server", "client"]), async (req, res) => {
   try {
     const files = await File.find();
-    res.json(files);
+    
+    const formattedFiles = files.map(file => ({
+      id: file._id,
+      title: file.filename,
+      fileUrl: `http://localhost:5000/api/files/download/${file.filename}` // Direct download link
+    }));
+
+    res.json(formattedFiles);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch files", error });
   }
 });
+
 
 // 📌 File download route (Allowed for: All roles)
 router.get("/download/:filename", verifyToken, authorizeRoles(["admin", "server", "client"]), (req, res) => {

@@ -10,18 +10,20 @@ const verifyToken = async (req, res, next) => {
       return res.status(401).json({ message: "Access Denied. Token missing or malformed." });
     }
 
-    token = token.split(" ")[1]; // Extract actual token
+    token = token.split(" ")[1]; // Extract token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded Token:", decoded); // Debugging
 
     const user = await User.findById(decoded.id);
     if (!user) {
       return res.status(401).json({ message: "User no longer exists." });
     }
 
-    req.user = user; // Attach full user object
+    console.log("User found:", user); // Debugging
+    req.user = user; // Attach user to request
     next();
   } catch (error) {
-    console.error("JWT Error:", error); // Log error for debugging
+    console.error("JWT Error:", error);
 
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Session expired. Please log in again." });
@@ -33,14 +35,23 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+
 // Middleware to check if the user has the required role
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Forbidden: You do not have permission" });
+    console.log("authorizeRoles Middleware - User Data:", req.user); // Debugging
+
+    if (!req.user || !req.user.role) {
+      return res.status(403).json({ message: "Forbidden: Role not found" });
     }
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: `Forbidden: You do not have permission. Required roles: ${roles}` });
+    }
+    
     next();
   };
 };
+
+
 
 module.exports = { verifyToken, authorizeRoles };

@@ -40,15 +40,16 @@ router.post("/materials", verifyToken, authorizeRoles("server"), async (req, res
 });
 
 
-// 📌 Client: Get study materials
-router.get("/materials", verifyToken, authorizeRoles("client"), async (req, res) => {
-    try {
-        const files = await FileModel.find().populate("uploadedBy", "name email");
-        res.json(files);
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error });
-    }
+// 📌 Client, Server, and Admin: Get study materials
+router.get("/materials", verifyToken, authorizeRoles("client", "server", "admin"), async (req, res) => {
+  try {
+      const files = await FileModel.find().populate("uploadedBy", "name email");
+      res.json(files);
+  } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+  }
 });
+
 
 
 module.exports = router;

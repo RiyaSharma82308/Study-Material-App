@@ -1,13 +1,13 @@
 const express = require("express");
 const { registerUser, loginUser, getUserProfile } = require("../controllers/authController");
 const upload = require("../middlewares/uploadMiddleware");
-const { verifyToken } = require("../middlewares/authMiddleware"); // ✅ Correct import
+const { verifyToken } = require("../middlewares/authMiddleware"); 
 
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/profile", verifyToken, getUserProfile); // ✅ This should now work
+router.get("/profile", verifyToken, getUserProfile); 
 
 // Protected dashboard route
 router.get("/dashboard", verifyToken, (req, res) => {

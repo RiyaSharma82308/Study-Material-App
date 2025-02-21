@@ -12,10 +12,15 @@ const path = require("path");
 
 const app = express();
 
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Only allow your frontend
+    credentials: true, // Allow cookies & authentication headers
+  })
+);
 // Middleware
 
 app.use(express.json());
-app.use(cors());
 
 // Connect to MongoDB
 connectDB()
@@ -36,6 +41,7 @@ app.use("/api/files", uploadRoutes);
 
 // user routes
 app.use("/api/users",userRoutes);
+
 
 
 // Start Server

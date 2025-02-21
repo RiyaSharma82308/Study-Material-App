@@ -3,12 +3,12 @@ const path = require("path");
 const upload = require("../middlewares/uploadMiddleware");
 const File = require("../models/FileModel");
 const fs = require("fs");
-const { protect, authorizeRole } = require("../middlewares/authMiddleware");
+const { verifyToken, authorizeRoles } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
 // 📌 Upload a file (Allowed for: Admin, Server)
-router.post("/upload", protect, authorizeRole(["admin", "server"]), upload.single("file"), async (req, res) => {
+router.post("/upload", verifyToken, authorizeRoles(["admin", "server"]), upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -31,7 +31,7 @@ router.post("/upload", protect, authorizeRole(["admin", "server"]), upload.singl
 });
 
 // 📌 Fetch all uploaded files (Allowed for: Admin, Server, Client)
-router.get("/files", protect, authorizeRole(["admin", "server", "client"]), async (req, res) => {
+router.get("/files", verifyToken, authorizeRoles(["admin", "server", "client"]), async (req, res) => {
   try {
     const files = await File.find();
     res.json(files);
@@ -41,7 +41,7 @@ router.get("/files", protect, authorizeRole(["admin", "server", "client"]), asyn
 });
 
 // 📌 File download route (Allowed for: All roles)
-router.get("/download/:filename", protect, authorizeRole(["admin", "server", "client"]), (req, res) => {
+router.get("/download/:filename", verifyToken, authorizeRoles(["admin", "server", "client"]), (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "../uploads", filename);
 
@@ -53,7 +53,7 @@ router.get("/download/:filename", protect, authorizeRole(["admin", "server", "cl
 });
 
 // 📌 Delete a file (Allowed for: Admin OR Server who uploaded it)
-router.delete("/files/:id", protect, authorizeRole(["admin", "server"]), async (req, res) => {
+router.delete("/files/:id", verifyToken, authorizeRoles(["admin", "server"]), async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file) {

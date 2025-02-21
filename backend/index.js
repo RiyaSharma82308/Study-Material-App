@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const uploadRoutes = require("./routes/uploadRoutes");
+const userRoutes = require("./routes/userRoutes");
 const path = require("path");
 
 const app = express();
@@ -32,6 +33,9 @@ app.use("/api/auth", authRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/files", uploadRoutes);
+
+// user routes
+app.use("/api/users",userRoutes);
 
 
 // Start Server

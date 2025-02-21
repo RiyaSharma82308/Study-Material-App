@@ -1,21 +1,22 @@
 const express = require("express");
 const { registerUser, loginUser, getUserProfile } = require("../controllers/authController");
 const upload = require("../middlewares/uploadMiddleware");
-const { protect } = require("../middlewares/authMiddleware"); // ✅ Correct import
+const { verifyToken } = require("../middlewares/authMiddleware"); // ✅ Correct import
 
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/profile", protect, getUserProfile); // ✅ This should now work
+router.get("/profile", verifyToken, getUserProfile); // ✅ This should now work
 
 // Protected dashboard route
-router.get("/dashboard", protect, (req, res) => {
+router.get("/dashboard", verifyToken, (req, res) => {
     res.json({ message: "Welcome to the dashboard!", user: req.user });
 });
 
+
 // Upload a file (Only logged-in users)
-router.post("/upload", protect, upload.single("file"), (req, res) => {
+router.post("/upload", verifyToken, upload.single("file"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }

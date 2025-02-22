@@ -12,15 +12,20 @@ const Login = () => {
         e.preventDefault();
         try {
             const { data } = await login(email, password);
+            
+            console.log("Login Response Data:", data); // Debugging
+    
             localStorage.setItem("token", data.token);
             localStorage.setItem("role", data.role);
+    
             alert("Login successful!");
-            navigate("/dashboard");
+            navigate("/");
         } catch (error) {
             console.error("Login failed", error);
             alert("Error: " + (error.response?.data?.message || "Invalid credentials"));
         }
     };
+    
 
     return (
         <div className="container d-flex justify-content-center align-items-center vh-100">

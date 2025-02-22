@@ -14,12 +14,19 @@ router.post("/upload", verifyToken, authorizeRoles("admin", "server"), upload.si
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    const { subject } = req.body; // Get subject from request body
+
+    if (!subject) {
+      return res.status(400).json({ message: "Subject is required" });
+    }
+
     const newFile = new File({
       filename: req.file.filename,
       filepath: req.file.path,
       mimetype: req.file.mimetype,
       size: req.file.size,
-      uploadedBy: req.user.id, // Store uploader's ID
+      subject, 
+      uploadedBy: req.user.id, 
     });
 
     await newFile.save();
@@ -30,6 +37,7 @@ router.post("/upload", verifyToken, authorizeRoles("admin", "server"), upload.si
   }
 });
 
+
 // 📌 Fetch all uploaded files (Allowed for: Admin, Server, Client)
 router.get("/files", verifyToken, authorizeRoles("admin", "server", "client"), async (req, res) => {
   try {
@@ -38,6 +46,8 @@ router.get("/files", verifyToken, authorizeRoles("admin", "server", "client"), a
     const formattedFiles = files.map(file => ({
       id: file._id,
       title: file.filename,
+      subject: file.subject,
+      uploadedBy: file.uploadedBy,
       fileUrl: `http://localhost:5000/api/files/download/${file.filename}`
     }));
 
@@ -94,5 +104,28 @@ router.delete("/files/:id", verifyToken, authorizeRoles("admin", "server"), asyn
     res.status(500).json({ message: "Failed to delete file", error: error.message });
   }
 });
+
+
+// seaarching for materials based on  subject
+router.get("/files/search", verifyToken, authorizeRoles(["admin", "server", "client"]), async (req, res) => {
+  try {
+    const { subject } = req.query; // Get subject from query params
+
+    if (!subject) {
+      return res.status(400).json({ message: "Subject is required for searching" });
+    }
+
+    const files = await File.find({ subject });
+
+    if (files.length === 0) {
+      return res.status(404).json({ message: "No files found for this subject" });
+    }
+
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch files", error });
+  }
+});
+
 
 module.exports = router;

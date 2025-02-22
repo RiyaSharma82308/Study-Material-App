@@ -6,6 +6,7 @@ const FileSchema = new mongoose.Schema(
     filepath: String,
     mimetype: String,
     size: Number,
+    subject: { type: String, required: true }, // Added subject field
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Link to user
   },
   { timestamps: true }

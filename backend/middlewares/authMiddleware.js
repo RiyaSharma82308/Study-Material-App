@@ -44,6 +44,8 @@ const authorizeRoles = (...roles) => {
     if (!req.user || !req.user.role) {
       return res.status(403).json({ message: "Forbidden: Role not found" });
     }
+    // console.log("role is", req.user.role);
+    // console.log({roles});
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({ message: `Forbidden: You do not have permission. Required roles: ${roles}` });
     }

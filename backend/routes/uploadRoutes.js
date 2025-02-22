@@ -8,7 +8,7 @@ const { verifyToken, authorizeRoles } = require("../middlewares/authMiddleware")
 const router = express.Router();
 
 // 📌 Upload a file (Allowed for: Admin, Server)
-router.post("/upload", verifyToken, authorizeRoles(["admin", "server"]), upload.single("file"), async (req, res) => {
+router.post("/upload", verifyToken, authorizeRoles("admin", "server"), upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -31,14 +31,14 @@ router.post("/upload", verifyToken, authorizeRoles(["admin", "server"]), upload.
 });
 
 // 📌 Fetch all uploaded files (Allowed for: Admin, Server, Client)
-router.get("/files", verifyToken, authorizeRoles(["admin", "server", "client"]), async (req, res) => {
+router.get("/files", verifyToken, authorizeRoles("admin", "server", "client"), async (req, res) => {
   try {
     const files = await File.find();
     
     const formattedFiles = files.map(file => ({
       id: file._id,
       title: file.filename,
-      fileUrl: `http://localhost:5000/api/files/download/${file.filename}` // Direct download link
+      fileUrl: `http://localhost:5000/api/files/download/${file.filename}`
     }));
 
     res.json(formattedFiles);
@@ -48,8 +48,9 @@ router.get("/files", verifyToken, authorizeRoles(["admin", "server", "client"]),
 });
 
 
+
 // 📌 File download route (Allowed for: All roles)
-router.get("/download/:filename", verifyToken, authorizeRoles(["admin", "server", "client"]), (req, res) => {
+router.get("/download/:filename", verifyToken, authorizeRoles("admin", "server", "client"), (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "../uploads", filename);
 
@@ -61,7 +62,7 @@ router.get("/download/:filename", verifyToken, authorizeRoles(["admin", "server"
 });
 
 // 📌 Delete a file (Allowed for: Admin OR Server who uploaded it)
-router.delete("/files/:id", verifyToken, authorizeRoles(["admin", "server"]), async (req, res) => {
+router.delete("/files/:id", verifyToken, authorizeRoles("admin", "server"), async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file) {

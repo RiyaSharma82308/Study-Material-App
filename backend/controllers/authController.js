@@ -7,8 +7,6 @@ const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-
-    // ❌ Remove bcrypt.hash() (Pre-save hook will handle hashing)
     const newUser = new User({ name, email, password, role });
 
     await newUser.save();

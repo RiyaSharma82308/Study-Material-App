@@ -11,12 +11,14 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const { data } = await login(email, password);
-            
-            console.log("Login Response Data:", data); // Debugging
+            const response = await login(email, password);
+            console.log("Full API Response:", response); // Debugging full response
+            console.log("Login Response Data:", response.data); // Debugging data part
     
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("role", data.role);
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("role", response.data.user?.role); // Ensure 'user' exists
+    
+            console.log("Saved Role:", localStorage.getItem("role")); // Check if saved properly
     
             alert("Login successful!");
             navigate("/");
@@ -25,6 +27,7 @@ const Login = () => {
             alert("Error: " + (error.response?.data?.message || "Invalid credentials"));
         }
     };
+    
     
 
     return (

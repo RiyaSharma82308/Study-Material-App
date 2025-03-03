@@ -3,19 +3,18 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Upload = () => {
-    const [title, setTitle] = useState("");
+    const [filename, setFilename] = useState(""); // Renamed from title to filename
     const [subject, setSubject] = useState("");
     const [file, setFile] = useState(null);
-    const [role, setRole] = useState(""); // To check user role
+    const [role, setRole] = useState(""); 
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check user role from localStorage or API
-        const userRole = localStorage.getItem("role"); // Assume role is stored in localStorage
+        const userRole = localStorage.getItem("role"); 
         if (!userRole || !["admin", "server"].includes(userRole)) {
             alert("Access Denied: Only Admins & Servers can upload materials.");
-            navigate("/"); // Redirect unauthorized users
+            navigate("/");
         }
         setRole(userRole);
     }, [navigate]);
@@ -26,41 +25,41 @@ const Upload = () => {
 
     const handleUpload = async (event) => {
         event.preventDefault();
-
-        if (!title || !subject || !file) {
-            setMessage({ type: "error", text: "All fields are required." });
+    
+        const fileInput = document.getElementById("file");
+        const selectedFile = fileInput.files[0];
+    
+        if (!selectedFile) {
+            alert("Please select a file.");
             return;
         }
-
+    
         const formData = new FormData();
-        formData.append("title", title);
+        formData.append("file", selectedFile);
+        formData.append("filename", filename.trim() !== "" ? filename.trim() : selectedFile.name); 
         formData.append("subject", subject);
-        formData.append("file", file);
-
+    
+        console.log("FormData content:");
+        for (let pair of formData.entries()) {
+            console.log(pair[0], pair[1]);  // Debugging: check what is actually being sent
+        }
+    
         try {
-            const token = localStorage.getItem("token");
             const response = await fetch("http://localhost:5000/api/files/upload", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 },
-                body: formData
+                body: formData,
             });
-
+    
             const result = await response.json();
-            if (response.ok) {
-                setMessage({ type: "success", text: "File uploaded successfully!" });
-                setTitle("");
-                setSubject("");
-                setFile(null);
-            } else {
-                setMessage({ type: "error", text: result.message || "Upload failed." });
-            }
+            console.log("Upload response:", result);
         } catch (error) {
-            console.error("Upload Error:", error);
-            setMessage({ type: "error", text: "Server error. Please try again." });
+            console.error("Upload error:", error);
         }
     };
+    
 
     return (
         <div className="container mt-5">
@@ -74,13 +73,13 @@ const Upload = () => {
 
             <form onSubmit={handleUpload} className="mt-4">
                 <div className="mb-3">
-                    <label className="form-label">Title</label>
+                    <label className="form-label">Filename</label> 
                     <input
                         type="text"
                         className="form-control"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
+                        value={filename} 
+                        onChange={(e) => setFilename(e.target.value)}
+                        placeholder="Enter filename"
                     />
                 </div>
 
@@ -97,7 +96,7 @@ const Upload = () => {
 
                 <div className="mb-3">
                     <label className="form-label">Upload File</label>
-                    <input type="file" className="form-control" onChange={handleFileChange} required />
+                    <input type="file" id="file" className="form-control" onChange={handleFileChange} required />
                 </div>
 
                 <button type="submit" className="btn btn-primary">Upload</button>

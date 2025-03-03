@@ -51,5 +51,21 @@ router.get("/materials", verifyToken, authorizeRoles("client", "server", "admin"
 });
 
 
+// 📌 Server: Get only the materials uploaded by the logged-in server
+router.get("/my-files", verifyToken, authorizeRoles("server"), async (req, res) => {
+  try {
+    const myFiles = await FileModel.find({ uploadedBy: req.user.id });
+
+    if (myFiles.length === 0) {
+      return res.status(404).json({ message: "You have not uploaded any materials yet" });
+    }
+
+    res.json(myFiles);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
 
 module.exports = router;

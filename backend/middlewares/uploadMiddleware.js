@@ -3,12 +3,18 @@ const path = require("path");
 
 // Configure storage
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Store files in 'uploads' folder
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Rename file with timestamp
-  },
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    const fileExt = path.extname(file.originalname);
+    const originalName = path.basename(file.originalname, fileExt);
+
+    // Ensure filename is read correctly
+    const customFilename = req.body.filename || originalName;
+    
+    console.log("Filename from request:", req.body.filename); // Debugging log
+    console.log("custom file name is:", customFilename); // Debugging log
+    cb(null, `${customFilename}${fileExt}`);
+  }
 });
 
 // File filter to allow only specific file types (e.g., PDFs, images)

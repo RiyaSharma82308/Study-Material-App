@@ -14,14 +14,19 @@ router.post("/upload", verifyToken, authorizeRoles("admin", "server"), upload.si
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const { subject } = req.body; // Get subject from request body
+    const { subject } = req.body;
+    const filename = req.body.filename;
 
     if (!subject) {
       return res.status(400).json({ message: "Subject is required" });
     }
 
+    if (!filename) {
+      return res.status(400).json({ message: "Filename is required" });
+    }
+
     const newFile = new File({
-      filename: req.file.filename,
+      filename, 
       filepath: req.file.path,
       mimetype: req.file.mimetype,
       size: req.file.size,
@@ -38,6 +43,7 @@ router.post("/upload", verifyToken, authorizeRoles("admin", "server"), upload.si
 });
 
 
+
 // 📌 Fetch all uploaded files (Allowed for: Admin, Server, Client)
 router.get("/files", verifyToken, authorizeRoles("admin", "server", "client"), async (req, res) => {
   try {
@@ -45,7 +51,7 @@ router.get("/files", verifyToken, authorizeRoles("admin", "server", "client"), a
     
     const formattedFiles = files.map(file => ({
       id: file._id,
-      title: file.filename,
+      filename: file.filename,
       subject: file.subject,
       uploadedBy: file.uploadedBy,
       fileUrl: `http://localhost:5000/api/files/download/${file.filename}`

@@ -4,32 +4,32 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const Dashboard = () => {
   const [studyMaterials, setStudyMaterials] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const role = localStorage.getItem("role"); // Get role from localStorage
 
   // Fetch study materials from the backend
   useEffect(() => {
     const fetchMaterials = async () => {
       try {
-        const token = localStorage.getItem("token"); // Ensure token exists
+        const token = localStorage.getItem("token");
         if (!token) {
           throw new Error("User not authenticated");
         }
-
+  
         const response = await fetch("http://localhost:5000/api/files/files", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-
+  
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
+  
         const data = await response.json();
-        console.log("Fetched Data:", data); // Debugging
-
+        console.log("Fetched Data:", data); // 🔹 Debugging response
+  
         if (Array.isArray(data)) {
-          // Group study materials by subject
           const groupedMaterials = data.reduce((acc, material) => {
             if (!acc[material.subject]) {
               acc[material.subject] = [];
@@ -37,7 +37,7 @@ const Dashboard = () => {
             acc[material.subject].push(material);
             return acc;
           }, {});
-
+  
           console.log("Grouped Data:", groupedMaterials);
           setStudyMaterials(groupedMaterials);
         } else {
@@ -47,9 +47,10 @@ const Dashboard = () => {
         console.error("Error fetching study materials:", error);
       }
     };
-
+  
     fetchMaterials();
   }, []);
+  
 
   // Filter materials based on the search term
   const filteredMaterials = Object.entries(studyMaterials).reduce(
@@ -66,20 +67,31 @@ const Dashboard = () => {
     <div>
       {/* Navbar */}
       <nav className="navbar navbar-dark bg-primary">
-        <div className="container">
+        <div className="container d-flex justify-content-between">
           <a className="navbar-brand" href="/">
             Study Materials
           </a>
-          {localStorage.getItem("role")}
-          {["admin", "server"].includes(localStorage.getItem("role")) && (
-            <a className="btn btn-light" href="/upload">
-              Upload Material
-            </a>
-          )}
 
-          <a className="btn btn-light" href="/login">
-            Logout
-          </a>
+          <div className="d-flex gap-2">
+            {/* Upload Button (Visible for Admin & Server) */}
+            {["admin", "server"].includes(role) && (
+              <a className="btn btn-light" href="/upload">
+                Upload Material
+              </a>
+            )}
+
+            {/* NEW: "My Uploads" Button (Visible Only for Servers) */}
+            {role === "server" && (
+              <a className="btn btn-light" href="/my-uploads">
+                My Uploads
+              </a>
+            )}
+
+            {/* Logout Button */}
+            <a className="btn btn-light" href="/login">
+              Logout
+            </a>
+          </div>
         </div>
       </nav>
 
@@ -107,9 +119,12 @@ const Dashboard = () => {
                   <div key={index} className="col-md-4">
                     <div className="card mb-3 shadow-sm">
                       <div className="card-body">
-                        <h5 className="card-title">{material.title}</h5>
+                        {/* Display filename */}
+                        <p className="card-text">
+                          <strong>File:</strong> {material.filename || "Unnamed File"}
+                        </p>{" "}
                         <a
-                          href={material.fileUrl}
+                          href={material.filepath}
                           className="btn btn-primary"
                           download
                         >

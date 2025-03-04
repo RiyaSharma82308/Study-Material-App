@@ -14,21 +14,21 @@ const Dashboard = () => {
         if (!token) {
           throw new Error("User not authenticated");
         }
-  
+
         const response = await fetch("http://localhost:5000/api/files/files", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-  
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-  
+
         const data = await response.json();
         console.log("Fetched Data:", data); // 🔹 Debugging response
-  
+
         if (Array.isArray(data)) {
           const groupedMaterials = data.reduce((acc, material) => {
             if (!acc[material.subject]) {
@@ -37,7 +37,7 @@ const Dashboard = () => {
             acc[material.subject].push(material);
             return acc;
           }, {});
-  
+
           console.log("Grouped Data:", groupedMaterials);
           setStudyMaterials(groupedMaterials);
         } else {
@@ -47,11 +47,42 @@ const Dashboard = () => {
         console.error("Error fetching study materials:", error);
       }
     };
-  
+
     fetchMaterials();
   }, []);
+  const handleDownload = async (filename) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("User not authenticated");
+      }
   
-
+      const response = await fetch(`http://localhost:5000/api/files/download/${filename}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+  
+      // Create a blob and trigger download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+  
   // Filter materials based on the search term
   const filteredMaterials = Object.entries(studyMaterials).reduce(
     (acc, [subject, materials]) => {
@@ -121,15 +152,15 @@ const Dashboard = () => {
                       <div className="card-body">
                         {/* Display filename */}
                         <p className="card-text">
-                          <strong>File:</strong> {material.filename || "Unnamed File"}
+                          <strong>File:</strong>{" "}
+                          {material.filename || "Unnamed File"}
                         </p>{" "}
-                        <a
-                          href={material.filepath}
+                        <button
                           className="btn btn-primary"
-                          download
+                          onClick={() => handleDownload(material.filename)}
                         >
                           Download
-                        </a>
+                        </button>
                       </div>
                     </div>
                   </div>

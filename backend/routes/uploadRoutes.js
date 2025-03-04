@@ -15,7 +15,7 @@ router.post("/upload", verifyToken, authorizeRoles("admin", "server"), upload.si
     }
 
     const { subject } = req.body;
-    const filename = req.body.filename;
+    const filename = req.file.filename;
 
     if (!subject) {
       return res.status(400).json({ message: "Subject is required" });
